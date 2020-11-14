@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using EasyNetQ;
 using MessageBrokerLibrary;
 using Microsoft.Extensions.Logging;
+using RabbitMQMessages;
 
 namespace EasyNetQApi.FinanceDomain
 {
@@ -16,24 +17,29 @@ namespace EasyNetQApi.FinanceDomain
             _messageBroker = messageBroker;
             _logger = logger;
         }
-        public async Task GenerateDocument()
+        public void GenerateDocument()
         {
-            _messageBroker.RabbitMqPubSub.Publish(new FinanceMessage(100, "ABC", Guid.NewGuid().ToString()), "Finance.Invoice");
+            //   _messageBroker.RabbitMqPubSub.Publish(new FinanceMessage(100, "ABC", Guid.NewGuid().ToString()), "Finance.Invoice");
 
-            _logger.LogInformation("Message successfully published");
+            // _logger.LogInformation("Message successfully published");
 
-            // var t = await _messageBroker.RabbitMqPubSub.PublishAsync(new FinanceMessage(100,"ABC"), configuration => configuration.WithTopic())
-            //await  _messageBroker.RabbitMqPubSub.PublishAsync(new FinanceMessage(100, "ABC"),
-            //      configuration => configuration.WithTopic("FinTopic")).ContinueWith(task =>
-            //  {
-            //      if (task.IsFaulted)
-            //      {
-            //          if (task.Exception != null) _logger.LogError(task.Exception.InnerException?.Message);
-            //          // throw new EasyNetQException("Unable to publish the message");
-            //      }
+            var guid = Guid.NewGuid().ToString();
+            var msg = new Message {Text = guid};
+            //_messageBroker.RabbitMqPubSub.Publish(msg);
 
-            //      _logger.LogInformation("Message successfully published");
-            //  });
+            //_logger.LogInformation($"Message successfully published => {guid}");
+
+            _messageBroker.RabbitMqPubSub.PublishAsync(msg,
+                 configuration => configuration.WithTopic("Finance.Invoice")).ContinueWith(task =>
+             {
+                 if (task.IsFaulted)
+                 {
+                     if (task.Exception != null) _logger.LogError(task.Exception.InnerException?.Message);
+
+                 }
+
+                 _logger.LogInformation($"Message successfully published => {guid}");
+             });
         }
     }
 }
