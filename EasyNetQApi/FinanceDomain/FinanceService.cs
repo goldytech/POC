@@ -19,16 +19,10 @@ namespace EasyNetQApi.FinanceDomain
         }
         public void GenerateDocument()
         {
-            //   _messageBroker.RabbitMqPubSub.Publish(new FinanceMessage(100, "ABC", Guid.NewGuid().ToString()), "Finance.Invoice");
-
-            // _logger.LogInformation("Message successfully published");
-
+            
             var guid = Guid.NewGuid().ToString();
-            var msg = new Message {Text = guid};
-            //_messageBroker.RabbitMqPubSub.Publish(msg);
-
-            //_logger.LogInformation($"Message successfully published => {guid}");
-
+            var msg = new Message { Text = guid };
+            
             _messageBroker.RabbitMqPubSub.PublishAsync(msg,
                  configuration => configuration.WithTopic("Finance.Invoice")).ContinueWith(task =>
              {
